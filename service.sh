@@ -14,7 +14,6 @@ main() {
     deploys=$(echo "$entry" | cut -d ":" -f 2)
     dns_method=$(echo "$entry" | cut -d ":" -f 3)
 
-    name=$(echo "$domains" | cut -d ',' -f 1)
     issue_args=$(if [ -z "$dns_method" ]; then echo "-w /webroot"; else echo "--dns $dns_method"; fi)
     domain_args="$(echo "$domains" | tr "," "\n" | sed -e "s/^/--domain /" | tr "\n" " ")"
     deploy_args="$(echo "$deploys" | tr "," "\n" | sed -e "s/^/--deploy-hook /" | tr "\n" " ")"
@@ -32,10 +31,9 @@ main() {
     acme.sh \
       --issue $issue_args \
       --email $ACME_EMAIL \
-      --key-file "/dist/$name.key" \
-      --fullchain-file "/dist/$name.crt" \
-      --post-hook "acme.sh --deploy $deploy_args $domain_args" \
-      $domain_args || code=$?
+      $domain_args \
+      --post-hook "acme.sh --deploy $deploy_args $domain_args" ||
+      code=$?
 
     # RENEW_SKIP = 2
     if [ $code -ne 0 ] && [ $code -ne 2 ]; then
