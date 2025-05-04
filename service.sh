@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# term() {
-#   echo "term"
-#   exit 0
-# }
-
-# trap 'term' HUP
+term() {
+  echo "term"
+  exit 0
+}
+trap 'term' HUP
 
 main() {
   for entry in $(echo "$ACME_CERTS" | tr ";" "\n"); do
@@ -32,13 +31,14 @@ main() {
       --issue $issue_args \
       --email $ACME_EMAIL \
       $domain_args \
-      --post-hook "acme.sh --deploy $deploy_args $domain_args" ||
+      --post-hook "if [ -n \"\$Le_Domain\" ]; then acme.sh --deploy $deploy_args $domain_args; fi" ||
       code=$?
 
-    # RENEW_SKIP = 2
-    if [ $code -ne 0 ] && [ $code -ne 2 ]; then
-      return $code
-    fi
+    # no abort on request error(eg. localhost.pem)
+    # # RENEW_SKIP = 2
+    # if [ $code -ne 0 ] && [ $code -ne 2 ]; then
+    #   return $code
+    # fi
   done
 
   return 0
