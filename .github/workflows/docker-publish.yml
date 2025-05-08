@@ -37,7 +37,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
-            latest=true
+            latest=${{ github.ref_name == github.event.repository.default_branch }}
 
       - name: Build and push Docker image
         id: build-and-push
